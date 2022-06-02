@@ -1,2 +1,6 @@
 # ChatApp
- This application offers a way of communication, chat type, between users.
+Represents a chat application, made in Python, using Flask.<br>
+# Setup
+```shell
+> pipenv install
+```
