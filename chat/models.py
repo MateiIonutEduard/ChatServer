@@ -19,7 +19,7 @@ class Account(db.Model):
     Address = db.Column(db.Text, nullable=False)
     Status = db.Column(db.Text, nullable=True)
     Profile = db.Column(db.Text, nullable=True)
-    apikey = db.Column(db.Text)
+    apikey = db.Column(db.Text, nullable=True)
 
     def __init__(self, Username, Password, Address, Status, Profile, apiKey):
         self.Username = Username
@@ -29,7 +29,7 @@ class Account(db.Model):
         self.Status = Status
 
         self.Profile = Profile
-        self.apiKey = apiKey
+        self.apikey = apiKey
 
 
 class Message(db.Model):
@@ -53,6 +53,17 @@ class Audio(db.Model):
     MessageId = db.Column(db.ForeignKey('message.Id'), nullable=False, index=True)
 
     message = db.relationship('Message')
+
+
+@app.route('/api/account/profile/', methods=['GET'])
+def getProfile():
+    key = request.args.get('apikey')
+
+    if key is not None:
+        account = Account.query.filter(Account.apikey == key).all()
+        return send_file(account.Profile, mimetype='image/*')
+    else:
+        return Response('NotFound', status=404)
 
 
 @app.route('/api/account/', methods=['GET', 'POST'])
@@ -91,7 +102,7 @@ def updateAccount():
                 account.apikey = apiKey
 
                 db.session.commit()
-                return jsonify({'apikey': apiKey})
+                return jsonify(apikey=apiKey)
             else:
                 return Response(response="Unauthorized", status=401)
 
@@ -110,4 +121,6 @@ def updateAccount():
             apiKey = getApiKey()
             account = Account(username, password, address, status, imagePath, apiKey)
             db.session.add(account)
+
             db.session.commit()
+            return jsonify(apikey=apiKey)

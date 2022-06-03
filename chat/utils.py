@@ -5,10 +5,10 @@ import hashlib
 
 def getHash(str):
     buffer = hashlib.sha256(str.encode('utf-8'))
-    return b64encode(buffer)
+    return b64encode(buffer).__str__()
 
 
 def getApiKey():
     buf = os.urandom(16)
     apiKey = b64encode(buf)
-    return apiKey
+    return apiKey.__str__()
