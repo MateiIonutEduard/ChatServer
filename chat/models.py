@@ -88,18 +88,19 @@ def updateAccount():
             else:
                 return Response(response="Unauthorized", status=401)
     elif request.method == 'POST':
-        username = request.form['Username']
-
-        if username is None:
+        if not 'Username' in request.form:
             address = request.form['Address']
             password = request.form['Password']
 
             account = Account.query.filter(Account.Address == address).all()
             hashKey = getHash(password)
 
-            if account.Password == hashKey:
+            if len(account) < 1:
+                return Response(response="NotFound", status=404)
+
+            if account[0].Password == hashKey:
                 apiKey = getApiKey()
-                account.apikey = apiKey
+                account[0].apikey = apiKey
 
                 db.session.commit()
                 return jsonify(apikey=apiKey)
@@ -107,6 +108,7 @@ def updateAccount():
                 return Response(response="Unauthorized", status=401)
 
         else:
+            username = request.form['Username']
             address = request.form['Address']
             password = request.form['Password']
 
@@ -118,8 +120,10 @@ def updateAccount():
                 imagePath = "data/{}".format(profile.filename)
                 profile.save(imagePath)
 
+            passKey = getHash(password)
             apiKey = getApiKey()
-            account = Account(username, password, address, status, imagePath, apiKey)
+
+            account = Account(username, passKey, address, status, imagePath, apiKey)
             db.session.add(account)
 
             db.session.commit()
